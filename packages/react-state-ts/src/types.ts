@@ -13,3 +13,5 @@ export type DataType<TCommand> = TCommand extends Command<any, infer TData>
 
 export type Listener<TState> = (newState: TState, oldState: TState) => void
 export type Unsubscribe = () => void
+
+export type Query<TState, TQueryResult> = (state: TState) => TQueryResult
