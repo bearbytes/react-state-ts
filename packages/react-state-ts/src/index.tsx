@@ -16,9 +16,9 @@ import {
 } from './types'
 import immer from 'immer'
 
-export function createStore<TState>(
+export function createStore<TState, TEvents>(
   opts?: CreateStoreOptions<TState>
-): CreateStoreResult<TState> {
+): CreateStoreResult<TState, TEvents> {
   const globalStore =
     opts && opts.initialState ? createStore(opts.initialState) : null
 
@@ -28,7 +28,7 @@ export function createStore<TState>(
       }
     : undefined
 
-  const susbcribe = globalStore
+  const subscribe = globalStore
     ? function<TQueryResult>(
         query: Query<TState, TQueryResult>,
         listener: Listener<TQueryResult>
@@ -39,7 +39,7 @@ export function createStore<TState>(
       }
     : undefined
 
-  const commands: { [type: string]: Command<TState, any> } = {}
+  const commands: { [type: string]: Command<TState, TEvents, any> } = {}
 
   const Context = React.createContext({ store: globalStore })
 
@@ -53,7 +53,7 @@ export function createStore<TState>(
   //   })
   // }
 
-  function addCommands<TCommands extends Commands<TState>>(
+  function addCommands<TCommands extends Commands<TState, TEvents>>(
     addedCommands: TCommands
   ): AddCommandsResult<TCommands> {
     for (const type in addedCommands) {
@@ -126,9 +126,10 @@ export function createStore<TState>(
       const command = commands[action.type]
 
       const oldState = store.state
-      const newState = immer(oldState, (draft: TState) =>
-        command(draft, action)
-      )
+      const newState = immer(oldState, (draft: TState) => {
+        const commandResult = command(draft, action)
+        // TODO trigger events from commandResult
+      })
 
       store.state = newState
       for (const listener of store.stateListeners) {

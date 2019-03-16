@@ -2,7 +2,7 @@ export interface CreateStoreOptions<TState> {
   initialState?: TState
 }
 
-export interface CreateStoreResult<TState> {
+export interface CreateStoreResult<TState, TEvents> {
   query?: <TQueryResult>(query: Query<TState, TQueryResult>) => TQueryResult
 
   subscribe?: <TQueryResult>(
@@ -12,7 +12,7 @@ export interface CreateStoreResult<TState> {
 
   useQuery: <TQueryResult>(query: Query<TState, TQueryResult>) => TQueryResult
 
-  addCommands: <TCommands extends Commands<TState>>(
+  addCommands: <TCommands extends Commands<TState, TEvents>>(
     commands: TCommands
   ) => AddCommandsResult<TCommands>
 
@@ -44,14 +44,24 @@ export interface Store<TState> {
 
 export type Action = { type: string }
 
-export type Command<TState, TData> = (state: TState, data: TData) => void
-export type Commands<TState> = { [commandType: string]: Command<TState, any> }
+export type Command<TState, TEvents, TData> = (
+  state: TState,
+  data: TData
+) => void | EventType<TEvents> | EventType<TEvents>[]
+export type Commands<TState, TEvents> = {
+  [commandType: string]: Command<TState, TEvents, any>
+}
+
+export type EventType<TEvents> = EventTypes<TEvents>[keyof TEvents]
+export type EventTypes<TEvents> = {
+  [K in keyof TEvents]: { type: K } & TEvents[K]
+}
 
 export type ActionType<TCommands> = ActionTypes<TCommands>[keyof TCommands]
 export type ActionTypes<TCommands> = {
   [K in keyof TCommands]: { type: K } & DataType<TCommands[K]>
 }
-export type DataType<TCommand> = TCommand extends Command<any, infer TData>
+export type DataType<TCommand> = TCommand extends Command<any, any, infer TData>
   ? TData
   : {}
 
