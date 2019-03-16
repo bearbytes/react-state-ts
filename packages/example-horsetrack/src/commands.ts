@@ -1,16 +1,15 @@
-import { createStore } from 'react-state-ts'
-import { AppState, RacingHorse } from './types'
+import { addCommands } from './store'
+import { RacingHorse } from './types'
 
-const { StoreContainer, addCommands, useSelection } = createStore<AppState>()
-const { useCommand } = addCommands({
+export const { useCommand } = addCommands({
   start: (s) => {
     s.isRunning = true
   },
   stop: (s) => {
     s.isRunning = false
   },
-  progress: (s, data: { horseName: string; amount: number }) => {
-    s.progress[data.horseName] += data.amount
+  moveForward: (s, data: { horseName: string; moveBy: number }) => {
+    s.progress[data.horseName] += data.moveBy
   },
   addHorse: (s, data: { horse: RacingHorse }) => {
     s.horses.push(data.horse)
