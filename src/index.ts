@@ -25,25 +25,35 @@ export function createStore<TState>() {
   function addCommands<TCommands extends Commands<TState>>(
     commands: TCommands
   ) {
+    // Signature1
     function useCommand<K extends keyof TCommands>(
       type: K,
       data: DataType<TCommands[K]>
-    ) {
-      const store = useStore()
-      store.dispatch({ ...data, type })
-    }
+    ): () => void
 
-    function useCommand2<TArgs extends any[]>(
+    // Signature2
+    function useCommand<TArgs extends any[]>(
       createAction: (...args: TArgs) => ActionType<TCommands>
-    ) {
+    ): (...args: TArgs) => void
+
+    // Implementation
+    function useCommand(arg1: any, arg2?: any) {
       const store = useStore()
-      return function(...args: TArgs) {
-        const action = createAction(...args)
-        store.dispatch(action)
+
+      if (arg2 != undefined) {
+        const type = arg1
+        const data = arg2
+        return () => store.dispatch({ ...data, type })
+      } else {
+        const createAction = arg1
+        return (...args: any) => {
+          const action = createAction(...args)
+          store.dispatch(action)
+        }
       }
     }
 
-    return { useCommand, useCommand2 }
+    return { useCommand }
   }
 
   return { addCommands }
