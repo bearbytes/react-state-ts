@@ -8,28 +8,24 @@ import {
   ActionType,
   Unsubscribe,
   Query,
+  CreateStoreOptions,
+  CreateStoreResult,
+  AddCommandsResult,
+  StoreContainerProps,
+  Store,
 } from './types'
 import immer from 'immer'
 import { Observable } from 'zen-observable-ts'
 
-interface CreateStoreOptions<TState> {
-  initialState?: TState
-}
-
-export function createStore<TState>(opts?: CreateStoreOptions<TState>) {
-  type TStore = {
-    state: TState
-    stateListeners: Listener<TState>[]
-    dispatch(action: Action): void
-    subscribe(listener: Listener<TState>): Unsubscribe
-  }
+export function createStore<TState>(
+  opts?: CreateStoreOptions<TState>
+): CreateStoreResult<TState> {
   const globalStore =
     opts && opts.initialState ? createStore(opts.initialState) : null
 
   const commands: { [type: string]: Command<TState, any> } = {}
 
-  type TContext = { store: TStore | null }
-  const Context = React.createContext<TContext>({ store: globalStore })
+  const Context = React.createContext({ store: globalStore })
 
   return { addCommands, useQuery, StoreContainer }
 
@@ -49,7 +45,7 @@ export function createStore<TState>(opts?: CreateStoreOptions<TState>) {
 
   function addCommands<TCommands extends Commands<TState>>(
     addedCommands: TCommands
-  ) {
+  ): AddCommandsResult<TCommands> {
     for (const type in addedCommands) {
       // TODO check for duplicates
       commands[type] = addedCommands[type]
@@ -93,15 +89,10 @@ export function createStore<TState>(opts?: CreateStoreOptions<TState>) {
     return queryResult
   }
 
-  function StoreContainer(props: { initialState: TState; children?: any }) {
-    const storeRef = useRef<TStore>()
-    if (storeRef.current == null) {
-      storeRef.current = createStore(props.initialState)
-    }
+  function StoreContainer(props: StoreContainerProps<TState>) {
+    const [store] = useState(() => createStore(props.initialState))
     return (
-      <Context.Provider value={{ store: storeRef.current }}>
-        {props.children}
-      </Context.Provider>
+      <Context.Provider value={{ store }}>{props.children}</Context.Provider>
     )
   }
 
@@ -112,8 +103,8 @@ export function createStore<TState>(opts?: CreateStoreOptions<TState>) {
     return store
   }
 
-  function createStore(initialState: TState): TStore {
-    const store: TStore = {
+  function createStore(initialState: TState) {
+    const store: Store<TState> = {
       state: initialState,
       stateListeners: [],
       dispatch,

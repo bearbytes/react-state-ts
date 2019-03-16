@@ -1,3 +1,40 @@
+export interface CreateStoreOptions<TState> {
+  initialState?: TState
+}
+
+export interface CreateStoreResult<TState> {
+  addCommands<TCommands extends Commands<TState>>(
+    commands: TCommands
+  ): AddCommandsResult<TCommands>
+
+  useQuery<TQueryResult>(query: Query<TState, TQueryResult>): TQueryResult
+
+  StoreContainer: React.ComponentType<StoreContainerProps<TState>>
+}
+
+export interface AddCommandsResult<TCommands> {
+  useCommand: UseCommand<TCommands>
+}
+
+export interface UseCommand<TCommands> {
+  <K extends keyof TCommands>(type: K, data: DataType<TCommands[K]>): () => void
+  <TArgs extends any[]>(
+    createAction: (...args: TArgs) => ActionType<TCommands>
+  ): (...args: TArgs) => void
+}
+
+export interface StoreContainerProps<TState> {
+  initialState: TState
+  children?: any
+}
+
+export interface Store<TState> {
+  state: TState
+  stateListeners: Listener<TState>[]
+  dispatch(action: Action): void
+  subscribe(listener: Listener<TState>): Unsubscribe
+}
+
 export type Action = { type: string }
 
 export type Command<TState, TData> = (state: TState, data: TData) => void
