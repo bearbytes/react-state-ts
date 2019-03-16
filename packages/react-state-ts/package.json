@@ -4,6 +4,12 @@
   "description": "CQS for React with Redux integration and full Typescript support",
   "author": "bearbytes",
   "license": "ISC",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "immer": "^2.1.3"
   },

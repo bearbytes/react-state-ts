@@ -19,11 +19,11 @@ export function createStore<TState>() {
   }
 
   type TContext = { store: TStore }
-  const Context = React.createContext<TContext>(null)
+  const Context = React.createContext<TContext>(null as any)
 
   const commands: { [type: string]: Command<TState, any> } = {}
 
-  return { addCommands, useSelection, StateContainer }
+  return { addCommands, useSelection, StoreContainer }
 
   function addCommands<TCommands extends Commands<TState>>(
     addedCommands: TCommands
@@ -56,7 +56,7 @@ export function createStore<TState>() {
         return () => store.dispatch({ ...data, type })
       } else {
         const createAction = arg1
-        return (...args: any) => {
+        return (...args: any[]) => {
           const action = createAction(...args)
           store.dispatch(action)
         }
@@ -71,20 +71,20 @@ export function createStore<TState>() {
     return selection
   }
 
-  function StateContainer(props: { initialState: TState; children?: any }) {
-    const store = useRef<TStore>()
-
-    if (store.current == null) {
-      store.current = {
+  function StoreContainer(props: { initialState: TState; children?: any }) {
+    const storeRef = useRef<TStore>()
+    if (storeRef.current == null) {
+      storeRef.current = {
         state: props.initialState,
         stateListeners: [],
         dispatch,
         subscribe,
       }
     }
+    const store = storeRef.current!
 
     return (
-      <Context.Provider value={{ store: store.current }}>
+      <Context.Provider value={{ store: storeRef.current }}>
         {props.children}
       </Context.Provider>
     )
@@ -92,21 +92,21 @@ export function createStore<TState>() {
     function dispatch(action: Action) {
       const command = commands[action.type]
 
-      const oldState = store.current.state
+      const oldState = store.state
       const newState = immer(oldState, (draft: TState) =>
         command(draft, action)
       )
 
-      store.current.state = newState
-      for (const listener of store.current.stateListeners) {
+      store.state = newState
+      for (const listener of store.stateListeners) {
         listener(newState, oldState)
       }
     }
 
     function subscribe(listener: Listener<TState>): Unsubscribe {
-      store.current.stateListeners.push(listener)
+      store.stateListeners.push(listener)
       return () => {
-        store.current.stateListeners = store.current.stateListeners.filter(
+        store.stateListeners = store.stateListeners.filter(
           (it) => it != listener
         )
       }
@@ -114,6 +114,9 @@ export function createStore<TState>() {
   }
 
   function useStore() {
-    return useContext(Context).store
+    const { store } = useContext(Context)
+    if (store == null)
+      throw 'Did not find a store in current Context. Did you create a StoreContainer?'
+    return store
   }
 }
