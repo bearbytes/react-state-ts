@@ -1,21 +1,18 @@
 {
   "name": "react-state-ts",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
+  "version": "0.0.1",
+  "description": "CQS for React with Redux integration and full Typescript support",
+  "author": "bearbytes",
   "license": "ISC",
-  "devDependencies": {
-    "@types/react": "^16.8.8",
-    "@types/react-dom": "^16.8.2",
-    "react": "^16.8.4",
-    "react-dom": "^16.8.4",
-    "typescript": "^3.3.3333"
-  },
   "dependencies": {
     "immer": "^2.1.3"
+  },
+  "peerDependencies": {
+    "react": "^16.8.4"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.8",
+    "react": "^16.8.4",
+    "typescript": "^3.3.3333"
   }
 }
