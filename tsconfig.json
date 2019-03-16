@@ -3,6 +3,7 @@
     "outDir": "dist",
     "target": "es5",
 
+    "jsx": "preserve",
     "lib": ["esnext", "dom"],
 
     "module": "commonjs",

@@ -12,5 +12,8 @@
     "@types/react": "^16.8.8",
     "react": "^16.8.4",
     "typescript": "^3.3.3333"
+  },
+  "dependencies": {
+    "immer": "^2.1.3"
   }
 }
