@@ -7,30 +7,32 @@ import {
   Action,
   ActionType,
   Unsubscribe,
-  Query,
+  Select,
   CreateStoreOptions,
   CreateStoreResult,
-  AddCommandsResult,
   StoreContainerProps,
   Store,
 } from './types'
 import immer from 'immer'
 
-export function createStore<TState, TEvents>(
-  opts?: CreateStoreOptions<TState>
-): CreateStoreResult<TState, TEvents> {
-  const globalStore =
-    opts && opts.initialState ? createStore(opts.initialState) : null
+export function createStore<
+  TState,
+  TEvents,
+  TCommands extends Commands<TState, TEvents>
+>(
+  opts: CreateStoreOptions<TState, TEvents, TCommands>
+): CreateStoreResult<TState, TEvents, TCommands> {
+  const globalStore = opts.initialState ? createStore(opts.initialState) : null
 
   const query = globalStore
-    ? function<TQueryResult>(query: Query<TState, TQueryResult>) {
+    ? function<TQueryResult>(query: Select<TState, TQueryResult>) {
         return query(globalStore.state)
       }
     : undefined
 
   const subscribe = globalStore
     ? function<TQueryResult>(
-        query: Query<TState, TQueryResult>,
+        query: Select<TState, TQueryResult>,
         listener: Listener<TQueryResult>
       ) {
         return globalStore.subscribe((newState, oldState) =>
@@ -39,60 +41,29 @@ export function createStore<TState, TEvents>(
       }
     : undefined
 
-  const commands: { [type: string]: Command<TState, TEvents, any> } = {}
-
   const Context = React.createContext({ store: globalStore })
 
-  return { addCommands, useQuery, StoreContainer, query, subscribe }
+  return { query, subscribe, useQuery, useCommand, StoreContainer }
 
-  // function observe<TQueryResult>(
-  //   query: Query<TState, TQueryResult>
-  // ): Observable<TQueryResult> {
-  //   return new Observable(observer => {
-  //     observer.next(query())
-  //   })
-  // }
+  function useCommand(arg1: any, arg2?: any) {
+    const store = useStore()
 
-  function addCommands<TCommands extends Commands<TState, TEvents>>(
-    addedCommands: TCommands
-  ): AddCommandsResult<TCommands> {
-    for (const type in addedCommands) {
-      // TODO check for duplicates
-      commands[type] = addedCommands[type]
-    }
-
-    return { useCommand }
-
-    // Signature1
-    function useCommand<K extends keyof TCommands>(
-      type: K,
-      data: DataType<TCommands[K]>
-    ): () => void
-
-    // Signature2
-    function useCommand<TArgs extends any[]>(
-      createAction: (...args: TArgs) => ActionType<TCommands>
-    ): (...args: TArgs) => void
-
-    // Implementation
-    function useCommand(arg1: any, arg2?: any) {
-      const store = useStore()
-
-      if (arg2 != undefined) {
-        const type = arg1
-        const data = arg2
-        return () => store.dispatch({ ...data, type })
-      } else {
-        const createAction = arg1
-        return (...args: any[]) => {
-          const action = createAction(...args)
-          store.dispatch(action)
-        }
+    if (arg2 != undefined) {
+      // overload 1
+      const type = arg1
+      const data = arg2
+      return () => store.dispatch({ ...data, type })
+    } else {
+      // overload 2
+      const createAction = arg1
+      return (...args: any[]) => {
+        const action = createAction(...args)
+        store.dispatch(action)
       }
     }
   }
 
-  function useQuery<TQueryResult>(query: Query<TState, TQueryResult>) {
+  function useQuery<TQueryResult>(query: Select<TState, TQueryResult>) {
     const store = useStore()
     const [queryResult, setQueryResult] = useState(() => query(store.state))
     useEffect(() => store.subscribe((state) => setQueryResult(query(state))))
@@ -123,7 +94,7 @@ export function createStore<TState, TEvents>(
     return store
 
     function dispatch(action: Action) {
-      const command = commands[action.type]
+      const command = opts.commands[action.type]
 
       const oldState = store.state
       const newState = immer(oldState, (draft: TState) => {

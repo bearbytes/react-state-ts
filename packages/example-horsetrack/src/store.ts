@@ -1,10 +1,6 @@
 import { createStore } from 'react-state-ts'
 import { AppState, RacingHorse } from './types'
-
-export const { addCommands, useQuery, StoreContainer } = createStore<
-  AppState,
-  Events
->()
+import { Commands } from 'react-state-ts/dist/types'
 
 interface Events {
   started: {}
@@ -12,7 +8,7 @@ interface Events {
   addedHorse: { horse: RacingHorse }
 }
 
-export const { useCommand } = addCommands({
+const commands: Commands<AppState, Events> = {
   start: (s) => {
     s.isRunning = true
     return { type: 'started' }
@@ -35,4 +31,10 @@ export const { useCommand } = addCommands({
       horse: data.horse,
     }
   },
-})
+}
+
+export const { useQuery, useCommand, StoreContainer } = createStore<
+  AppState,
+  Events,
+  typeof commands
+>({ commands })

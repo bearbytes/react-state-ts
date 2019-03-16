@@ -1,26 +1,35 @@
-export interface CreateStoreOptions<TState> {
+export interface CreateStoreOptions<
+  TState,
+  TEvents,
+  TCommands extends Commands<TState, TEvents>
+> {
   initialState?: TState
+  commands: TCommands
 }
 
-export interface CreateStoreResult<TState, TEvents> {
-  query?: <TQueryResult>(query: Query<TState, TQueryResult>) => TQueryResult
+export interface CreateStoreResult<TState, TEvents, TCommands> {
+  query?: Query<TState>
+  subscribe?: Subscribe<TState>
 
-  subscribe?: <TQueryResult>(
-    query: Query<TState, TQueryResult>,
-    listener: Listener<TQueryResult>
-  ) => Unsubscribe
-
-  useQuery: <TQueryResult>(query: Query<TState, TQueryResult>) => TQueryResult
-
-  addCommands: <TCommands extends Commands<TState, TEvents>>(
-    commands: TCommands
-  ) => AddCommandsResult<TCommands>
+  useQuery: UseQuery<TState>
+  useCommand: UseCommand<TCommands>
 
   StoreContainer: React.ComponentType<StoreContainerProps<TState>>
 }
 
-export interface AddCommandsResult<TCommands> {
-  useCommand: UseCommand<TCommands>
+export interface Query<TState> {
+  <TSelection>(select: Select<TState, TSelection>): TSelection
+}
+
+export interface Subscribe<TState> {
+  <TSelection>(
+    select: Select<TState, TSelection>,
+    listener: Listener<TSelection>
+  ): Unsubscribe
+}
+
+export interface UseQuery<TState> {
+  <TSelection>(select: Select<TState, TSelection>): TSelection
 }
 
 export interface UseCommand<TCommands> {
@@ -68,4 +77,4 @@ export type DataType<TCommand> = TCommand extends Command<any, any, infer TData>
 export type Listener<TState> = (newState: TState, oldState?: TState) => void
 export type Unsubscribe = () => void
 
-export type Query<TState, TQueryResult> = (state: TState) => TQueryResult
+export type Select<TState, TSelection> = (state: TState) => TSelection
