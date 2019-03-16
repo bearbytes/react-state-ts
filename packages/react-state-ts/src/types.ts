@@ -3,11 +3,18 @@ export interface CreateStoreOptions<TState> {
 }
 
 export interface CreateStoreResult<TState> {
-  addCommands<TCommands extends Commands<TState>>(
-    commands: TCommands
-  ): AddCommandsResult<TCommands>
+  query?: <TQueryResult>(query: Query<TState, TQueryResult>) => TQueryResult
 
-  useQuery<TQueryResult>(query: Query<TState, TQueryResult>): TQueryResult
+  subscribe?: <TQueryResult>(
+    query: Query<TState, TQueryResult>,
+    listener: Listener<TQueryResult>
+  ) => Unsubscribe
+
+  useQuery: <TQueryResult>(query: Query<TState, TQueryResult>) => TQueryResult
+
+  addCommands: <TCommands extends Commands<TState>>(
+    commands: TCommands
+  ) => AddCommandsResult<TCommands>
 
   StoreContainer: React.ComponentType<StoreContainerProps<TState>>
 }
@@ -48,7 +55,7 @@ export type DataType<TCommand> = TCommand extends Command<any, infer TData>
   ? TData
   : {}
 
-export type Listener<TState> = (newState: TState, oldState: TState) => void
+export type Listener<TState> = (newState: TState, oldState?: TState) => void
 export type Unsubscribe = () => void
 
 export type Query<TState, TQueryResult> = (state: TState) => TQueryResult

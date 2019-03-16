@@ -15,7 +15,6 @@ import {
   Store,
 } from './types'
 import immer from 'immer'
-import { Observable } from 'zen-observable-ts'
 
 export function createStore<TState>(
   opts?: CreateStoreOptions<TState>
@@ -23,17 +22,28 @@ export function createStore<TState>(
   const globalStore =
     opts && opts.initialState ? createStore(opts.initialState) : null
 
+  const query = globalStore
+    ? function<TQueryResult>(query: Query<TState, TQueryResult>) {
+        return query(globalStore.state)
+      }
+    : undefined
+
+  const susbcribe = globalStore
+    ? function<TQueryResult>(
+        query: Query<TState, TQueryResult>,
+        listener: Listener<TQueryResult>
+      ) {
+        return globalStore.subscribe((newState, oldState) =>
+          listener(query(newState), oldState && query(oldState))
+        )
+      }
+    : undefined
+
   const commands: { [type: string]: Command<TState, any> } = {}
 
   const Context = React.createContext({ store: globalStore })
 
-  return { addCommands, useQuery, StoreContainer }
-
-  function query<TQueryResult>(query: Query<TState, TQueryResult>) {
-    if (globalStore == null)
-      throw 'Global Store does not exist. You need to pass initialState to createStore to use query'
-    return query(globalStore.state)
-  }
+  return { addCommands, useQuery, StoreContainer, query, subscribe }
 
   // function observe<TQueryResult>(
   //   query: Query<TState, TQueryResult>
