@@ -1,4 +1,4 @@
-export interface State {
+export interface AppState {
   horses: RacingHorse[]
   progress: { [horseName: string]: number }
   isRunning: boolean
