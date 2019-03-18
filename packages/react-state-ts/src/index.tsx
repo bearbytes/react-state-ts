@@ -1,27 +1,32 @@
-import React, { Ref, useContext, useState, useEffect, useRef } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import {
-  DataType,
-  Command,
   Commands,
   Listener,
   Action,
-  ActionType,
   Unsubscribe,
   Select,
   CreateStoreOptions,
   CreateStoreResult,
   StoreContainerProps,
   Store,
+  AddCommands,
+  AddCommandsResult,
+  ExecCommand,
+  Command,
 } from './types'
 import immer from 'immer'
 
-export function createStore<
-  TState,
-  TEvents,
-  TCommands extends Commands<TState, TEvents>
->(
-  opts: CreateStoreOptions<TState, TEvents, TCommands>
-): CreateStoreResult<TState, TEvents, TCommands> {
+export function defineCommands<TState, TEvents>() {
+  return function<TCommands extends Commands<TState, TEvents>>(
+    commands: TCommands
+  ) {
+    return commands
+  }
+}
+
+export function createStore<TState, TEvents = {}>(
+  opts: CreateStoreOptions<TState, TEvents>
+): CreateStoreResult<TState, TEvents> {
   const globalStore = opts.initialState ? createStore(opts.initialState) : null
 
   const query = globalStore
@@ -43,22 +48,34 @@ export function createStore<
 
   const Context = React.createContext({ store: globalStore })
 
-  return { query, subscribe, useQuery, useCommand, StoreContainer }
+  return { query, subscribe, useQuery, addCommands, StoreContainer }
 
-  function useCommand(arg1: any, arg2?: any) {
-    const store = useStore()
+  function addCommands<TCommands extends Commands<TState, TEvents>>(
+    commands: TCommands
+  ): AddCommandsResult<TCommands> {
+    return {
+      command: globalStore ? execCommand(globalStore) : undefined,
+      useCommand: execCommand(),
+    }
 
-    if (arg2 != undefined) {
-      // overload 1
-      const type = arg1
-      const data = arg2
-      return () => store.dispatch({ ...data, type })
-    } else {
-      // overload 2
-      const createAction = arg1
-      return (...args: any[]) => {
-        const action = createAction(...args)
-        store.dispatch(action)
+    function execCommand(
+      store: Store<TState, TEvents> = useStore()
+    ): ExecCommand<TCommands> {
+      return function(arg1: any, arg2?: any) {
+        if (arg2 != undefined) {
+          // overload 1
+          const type = arg1
+          const data = arg2
+          const action = { type, data }
+          return () => store.dispatch(action, commands[type])
+        } else {
+          // overload 2
+          const createAction = arg1
+          return (...args: any[]) => {
+            const action = createAction(...args)
+            store.dispatch(action, commands[action.type])
+          }
+        }
       }
     }
   }
@@ -85,7 +102,7 @@ export function createStore<
   }
 
   function createStore(initialState: TState) {
-    const store: Store<TState> = {
+    const store: Store<TState, TEvents> = {
       state: initialState,
       stateListeners: [],
       dispatch,
@@ -93,12 +110,13 @@ export function createStore<
     }
     return store
 
-    function dispatch(action: Action) {
-      const command = opts.commands[action.type]
-
+    function dispatch<TData>(
+      action: Action<TData>,
+      command: Command<TState, TEvents, TData>
+    ) {
       const oldState = store.state
       const newState = immer(oldState, (draft: TState) => {
-        const commandResult = command(draft, action)
+        const commandResult = command(draft, action.data)
         // TODO trigger events from commandResult
       })
 

@@ -1,20 +1,27 @@
-export interface CreateStoreOptions<
-  TState,
-  TEvents,
-  TCommands extends Commands<TState, TEvents>
-> {
+export interface CreateStoreOptions<TState, TEvents> {
   initialState?: TState
-  commands: TCommands
 }
 
-export interface CreateStoreResult<TState, TEvents, TCommands> {
+export interface CreateStoreResult<TState, TEvents> {
   query?: Query<TState>
   subscribe?: Subscribe<TState>
 
   useQuery: UseQuery<TState>
-  useCommand: UseCommand<TCommands>
+
+  addCommands: AddCommands<TState, TEvents>
 
   StoreContainer: React.ComponentType<StoreContainerProps<TState>>
+}
+
+export interface AddCommands<TState, TEvents> {
+  <TCommands extends Commands<TState, TEvents>>(
+    commands: TCommands
+  ): AddCommandsResult<TCommands>
+}
+
+export interface AddCommandsResult<TCommands> {
+  useCommand: ExecCommand<TCommands>
+  command?: ExecCommand<TCommands>
 }
 
 export interface Query<TState> {
@@ -32,7 +39,7 @@ export interface UseQuery<TState> {
   <TSelection>(select: Select<TState, TSelection>): TSelection
 }
 
-export interface UseCommand<TCommands> {
+export interface ExecCommand<TCommands> {
   <K extends keyof TCommands>(type: K, data: DataType<TCommands[K]>): () => void
   <TArgs extends any[]>(
     createAction: (...args: TArgs) => ActionType<TCommands>
@@ -44,14 +51,17 @@ export interface StoreContainerProps<TState> {
   children?: any
 }
 
-export interface Store<TState> {
+export interface Store<TState, TEvents> {
   state: TState
   stateListeners: Listener<TState>[]
-  dispatch(action: Action): void
+  dispatch<TData>(
+    action: Action<TData>,
+    implementation: Command<TState, TEvents, TData>
+  ): void
   subscribe(listener: Listener<TState>): Unsubscribe
 }
 
-export type Action = { type: string }
+export type Action<TData> = { type: string; data: TData }
 
 export type Command<TState, TEvents, TData> = (
   state: TState,
