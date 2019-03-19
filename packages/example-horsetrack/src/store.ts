@@ -1,4 +1,4 @@
-import { createStore, defineCommands } from 'react-state-ts'
+import { createFromState } from 'react-state-ts'
 import { AppState, RacingHorse } from './types'
 
 const initialState: AppState = {
@@ -13,10 +13,12 @@ interface Events {
   addedHorse: { horse: RacingHorse }
 }
 
-export const { StoreContainer, useQuery, subscribe, addCommands } = createStore<
-  AppState,
-  Events
->({ initialState })
+export const {
+  StoreContainer,
+  useQuery,
+  subscribe,
+  addCommands,
+} = createFromState<AppState, Events>({ initialState })
 
 export const { command, useCommand } = addCommands({
   start: (s) => {

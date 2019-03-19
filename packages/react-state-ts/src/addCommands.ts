@@ -4,7 +4,7 @@ export default function<TState, TEvents>(
   useStore: () => Store<TState, TEvents>,
   globalStore?: Store<TState, TEvents>
 ) {
-  return function addCommand<TCommands extends Commands<TState, TEvents>>(
+  return function addCommands<TCommands extends Commands<TState, TEvents>>(
     commands: TCommands
   ): AddCommandsResult<TCommands> {
     return {

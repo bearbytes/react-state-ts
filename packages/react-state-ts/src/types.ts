@@ -36,14 +36,6 @@ export interface UseQuery<TState> {
   <TSelection>(select: Select<TState, TSelection>): TSelection
 }
 
-// type ExecCommand1<TCommands> = <K extends keyof TCommands>(
-//   type: K,
-//   data: DataType<TCommands[K]>
-// ) => () => void
-// type ExecCommand2<TCommands> = <TArgs extends any[]>(
-//   createAction: (...args: TArgs) => ActionType<TCommands>
-// ) => (...args: TArgs) => void
-
 export type ExecCommand1<TCommands> = <K extends keyof TCommands>(
   type: K,
   data: DataType<TCommands[K]>
