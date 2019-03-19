@@ -2,20 +2,14 @@ import React, { useContext, useState, useEffect } from 'react'
 import {
   Commands,
   Listener,
-  Action,
-  Unsubscribe,
   Select,
   CreateStoreOptions,
   CreateStoreResult,
   StoreContainerProps,
   Store,
-  AddCommands,
-  AddCommandsResult,
-  ExecCommand,
-  Command,
 } from './types'
-import immer from 'immer'
 import addCommands from './addCommands'
+import createStore from './createStore'
 
 export function defineCommands<TState, TEvents>() {
   return function<TCommands extends Commands<TState, TEvents>>(
@@ -25,11 +19,11 @@ export function defineCommands<TState, TEvents>() {
   }
 }
 
-export function createStore<TState, TEvents = {}>(
+export function create<TState, TEvents = {}>(
   opts: CreateStoreOptions<TState, TEvents>
 ): CreateStoreResult<TState, TEvents> {
   const globalStore = opts.initialState
-    ? createStore(opts.initialState)
+    ? createStore<TState, TEvents>(opts.initialState)
     : undefined
 
   const query = globalStore
@@ -55,7 +49,7 @@ export function createStore<TState, TEvents = {}>(
     query,
     subscribe,
     useQuery,
-    addCommands: addCommands(useStore, globalStore),
+    addCommands: addCommands<TState, TEvents>(useStore, globalStore),
     StoreContainer,
   }
 
@@ -67,51 +61,18 @@ export function createStore<TState, TEvents = {}>(
   }
 
   function StoreContainer(props: StoreContainerProps<TState>) {
-    const [store] = useState(() => createStore(props.initialState))
+    const [store] = useState(() =>
+      createStore<TState, TEvents>(props.initialState)
+    )
     return (
       <Context.Provider value={{ store }}>{props.children}</Context.Provider>
     )
   }
 
-  function useStore() {
+  function useStore(): Store<TState, TEvents> {
     const { store } = useContext(Context)
     if (store == null)
       throw 'Did not find a store in current Context. Did you create a StoreContainer?'
     return store
-  }
-
-  function createStore(initialState: TState) {
-    const store: Store<TState, TEvents> = {
-      state: initialState,
-      stateListeners: [],
-      dispatch,
-      subscribe,
-    }
-    return store
-
-    function dispatch<TData>(
-      action: Action<TData>,
-      command: Command<TState, TEvents, TData>
-    ) {
-      const oldState = store.state
-      const newState = immer(oldState, (draft: TState) => {
-        const commandResult = command(draft, action.data)
-        // TODO trigger events from commandResult
-      })
-
-      store.state = newState
-      for (const listener of store.stateListeners) {
-        listener(newState, oldState)
-      }
-    }
-
-    function subscribe(listener: Listener<TState>): Unsubscribe {
-      store.stateListeners.push(listener)
-      return () => {
-        store.stateListeners = store.stateListeners.filter(
-          (it) => it != listener
-        )
-      }
-    }
   }
 }
