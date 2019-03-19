@@ -1,14 +1,17 @@
-import { Store, Action, Command, Listener, Unsubscribe } from './types'
+import { Store, Action, Command, Listener, Unsubscribe, Select } from './types'
 import immer from 'immer'
 
 export default function createStore<TState, TEvents>(initialState: TState) {
   const store: Store<TState, TEvents> = {
     state: initialState,
+
     stateListeners: [],
-    dispatch,
+
+    query,
     subscribe,
+
+    dispatch,
   }
-  return store
 
   function dispatch<TData>(
     action: Action<TData>,
@@ -26,10 +29,33 @@ export default function createStore<TState, TEvents>(initialState: TState) {
     }
   }
 
-  function subscribe(listener: Listener<TState>): Unsubscribe {
+  function query<TSelection>(select: Select<TState, TSelection>) {
+    return select(store.state)
+  }
+
+  function subscribe(listener: Listener<TState>): Unsubscribe
+  function subscribe<TSelection>(
+    select: Select<TState, TSelection>,
+    listener: Listener<TSelection>
+  ): Unsubscribe
+  function subscribe(arg1: any, arg2?: any) {
+    const listener = arg2 ? arg2 : arg1
+    const select = arg2 ? arg1 : undefined
+
     store.stateListeners.push(listener)
-    return () => {
+    function unsubscribe() {
       store.stateListeners = store.stateListeners.filter((it) => it != listener)
     }
+
+    if (select) {
+      return store.subscribe((newState, oldState) =>
+        listener(select(newState), oldState && select(oldState))
+      )
+    } else {
+      return store
+      return unsubscribe
+    }
   }
+
+  return store
 }

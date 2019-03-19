@@ -3,7 +3,7 @@ import { Select, StoreContainerProps, Store } from './types'
 import createStore from './createStore'
 
 export default function addReactContext<TState, TEvents>(
-  globalStore?: Store<TState, TEvents>
+  globalStore: Store<TState, TEvents>
 ) {
   const Context = React.createContext({ store: globalStore })
 
@@ -25,6 +25,7 @@ export default function addReactContext<TState, TEvents>(
     const [store] = useState(() =>
       createStore<TState, TEvents>(props.initialState)
     )
+
     return (
       <Context.Provider value={{ store }}>{props.children}</Context.Provider>
     )

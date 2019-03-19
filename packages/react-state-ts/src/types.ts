@@ -1,10 +1,12 @@
+import React from 'react'
+
 export interface CreateStoreOptions<TState, TEvents> {
   initialState?: TState
 }
 
 export interface CreateStoreResult<TState, TEvents> {
-  query?: Query<TState>
-  subscribe?: Subscribe<TState>
+  store: Store<TState, TEvents>
+
   useQuery: UseQuery<TState>
   addCommands: AddCommands<TState, TEvents>
   StoreContainer: React.ComponentType<StoreContainerProps<TState>>
@@ -19,17 +21,6 @@ export interface AddCommands<TState, TEvents> {
 export interface AddCommandsResult<TCommands> {
   useCommand: ExecCommand<TCommands>
   command?: ExecCommand<TCommands>
-}
-
-export interface Query<TState> {
-  <TSelection>(select: Select<TState, TSelection>): TSelection
-}
-
-export interface Subscribe<TState> {
-  <TSelection>(
-    select: Select<TState, TSelection>,
-    listener: Listener<TSelection>
-  ): Unsubscribe
 }
 
 export interface UseQuery<TState> {
@@ -56,12 +47,21 @@ export interface StoreContainerProps<TState> {
 
 export interface Store<TState, TEvents> {
   state: TState
+
   stateListeners: Listener<TState>[]
+
+  query<TSelection>(select: Select<TState, TSelection>): TSelection
+
+  subscribe(listener: Listener<TState>): Unsubscribe
+  subscribe<TSelection>(
+    select: Select<TState, TSelection>,
+    listener: Listener<TSelection>
+  ): Unsubscribe
+
   dispatch<TData>(
     action: Action<TData>,
     implementation: Command<TState, TEvents, TData>
   ): void
-  subscribe(listener: Listener<TState>): Unsubscribe
 }
 
 export type Action<TData> = { type: string; data: TData }

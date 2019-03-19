@@ -12,37 +12,17 @@ import addReactContext from './addReactContext'
 export function createFromState<TState, TEvents = {}>(
   opts: CreateStoreOptions<TState, TEvents>
 ): CreateStoreResult<TState, TEvents> {
-  const globalStore = opts.initialState
-    ? createStore<TState, TEvents>(opts.initialState)
-    : undefined
-
-  const query = globalStore
-    ? function<TQueryResult>(query: Select<TState, TQueryResult>) {
-        return query(globalStore.state)
-      }
-    : undefined
-
-  const subscribe = globalStore
-    ? function<TQueryResult>(
-        query: Select<TState, TQueryResult>,
-        listener: Listener<TQueryResult>
-      ) {
-        return globalStore.subscribe((newState, oldState) =>
-          listener(query(newState), oldState && query(oldState))
-        )
-      }
-    : undefined
+  const store = createStore<TState, TEvents>(opts.initialState!)
 
   const { useStore, useQuery, StoreContainer } = addReactContext<
     TState,
     TEvents
-  >(globalStore)
+  >(store)
 
   return {
-    query,
-    subscribe,
+    store,
     useQuery,
-    addCommands: addCommands<TState, TEvents>(useStore, globalStore),
     StoreContainer,
+    addCommands: addCommands<TState, TEvents>(useStore, store),
   }
 }

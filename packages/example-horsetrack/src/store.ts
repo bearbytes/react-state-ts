@@ -13,12 +13,10 @@ interface Events {
   addedHorse: { horse: RacingHorse }
 }
 
-export const {
-  StoreContainer,
-  useQuery,
-  subscribe,
-  addCommands,
-} = createFromState<AppState, Events>({ initialState })
+export const { store, StoreContainer, useQuery, addCommands } = createFromState<
+  AppState,
+  Events
+>({ initialState })
 
 export const { command, useCommand } = addCommands({
   start: (s) => {
@@ -45,7 +43,7 @@ export const { command, useCommand } = addCommands({
   },
 })
 
-subscribe!((s) => s, console.log)
+store.subscribe((s) => s, console.log)
 
 // command!('addHorse', {
 //   horse: {
