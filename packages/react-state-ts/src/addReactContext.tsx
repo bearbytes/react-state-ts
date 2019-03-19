@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { Select, StoreContainerProps, Store } from './types'
 import createStore from './createStore'
+import { map } from 'rxjs/operators'
 
 export default function addReactContext<TState, TEvents>(
   globalStore: Store<TState, TEvents>
@@ -14,11 +15,19 @@ export default function addReactContext<TState, TEvents>(
     return store
   }
 
-  function useQuery<TQueryResult>(query: Select<TState, TQueryResult>) {
+  function useQuery<TSelection>(
+    select: Select<TState, TSelection>
+  ): TSelection {
     const store = useStore()
-    const [queryResult, setQueryResult] = useState(() => query(store.state))
-    useEffect(() => store.subscribe((state) => setQueryResult(query(state))))
-    return queryResult
+
+    const [selection, setSelection] = useState(() => select(store.state.value))
+
+    useEffect(() => {
+      const subscription = store.state.pipe(map(select)).subscribe(setSelection)
+      return () => subscription.unsubscribe()
+    })
+
+    return selection
   }
 
   function StoreContainer(props: StoreContainerProps<TState>) {

@@ -1,15 +1,16 @@
-import { Store, Action, Command, Listener, Unsubscribe, Select } from './types'
+import { Store, Action, Command, EventType } from './types'
 import immer from 'immer'
+import { BehaviorSubject, Subject } from 'rxjs'
 
-export default function createStore<TState, TEvents>(initialState: TState) {
+export default function createStore<TState, TEvents>(
+  initialState: TState
+): Store<TState, TEvents> {
+  const state = new BehaviorSubject(initialState)
+  const events = new Subject<EventType<TEvents>>()
+
   const store: Store<TState, TEvents> = {
-    state: initialState,
-
-    stateListeners: [],
-
-    query,
-    subscribe,
-
+    state,
+    events,
     dispatch,
   }
 
@@ -17,44 +18,14 @@ export default function createStore<TState, TEvents>(initialState: TState) {
     action: Action<TData>,
     command: Command<TState, TEvents, TData>
   ) {
-    const oldState = store.state
+    const oldState = store.state.value
+
     const newState = immer(oldState, (draft: TState) => {
       const commandResult = command(draft, action.data)
       // TODO trigger events from commandResult
     })
 
-    store.state = newState
-    for (const listener of store.stateListeners) {
-      listener(newState, oldState)
-    }
-  }
-
-  function query<TSelection>(select: Select<TState, TSelection>) {
-    return select(store.state)
-  }
-
-  function subscribe(listener: Listener<TState>): Unsubscribe
-  function subscribe<TSelection>(
-    select: Select<TState, TSelection>,
-    listener: Listener<TSelection>
-  ): Unsubscribe
-  function subscribe(arg1: any, arg2?: any) {
-    const listener = arg2 ? arg2 : arg1
-    const select = arg2 ? arg1 : undefined
-
-    store.stateListeners.push(listener)
-    function unsubscribe() {
-      store.stateListeners = store.stateListeners.filter((it) => it != listener)
-    }
-
-    if (select) {
-      return store.subscribe((newState, oldState) =>
-        listener(select(newState), oldState && select(oldState))
-      )
-    } else {
-      return store
-      return unsubscribe
-    }
+    store.state.next(newState)
   }
 
   return store

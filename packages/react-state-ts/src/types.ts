@@ -1,4 +1,6 @@
 import React from 'react'
+import { Observable } from 'rxjs'
+import { BehaviorSubject } from 'rxjs'
 
 export interface CreateStoreOptions<TState, TEvents> {
   initialState?: TState
@@ -7,7 +9,8 @@ export interface CreateStoreOptions<TState, TEvents> {
 export interface CreateStoreResult<TState, TEvents> {
   store: Store<TState, TEvents>
 
-  useQuery: UseQuery<TState>
+  useQuery<TSelection>(select: Select<TState, TSelection>): TSelection
+
   addCommands: AddCommands<TState, TEvents>
   StoreContainer: React.ComponentType<StoreContainerProps<TState>>
 }
@@ -21,10 +24,6 @@ export interface AddCommands<TState, TEvents> {
 export interface AddCommandsResult<TCommands> {
   useCommand: ExecCommand<TCommands>
   command?: ExecCommand<TCommands>
-}
-
-export interface UseQuery<TState> {
-  <TSelection>(select: Select<TState, TSelection>): TSelection
 }
 
 export type ExecCommand1<TCommands> = <K extends keyof TCommands>(
@@ -46,17 +45,8 @@ export interface StoreContainerProps<TState> {
 }
 
 export interface Store<TState, TEvents> {
-  state: TState
-
-  stateListeners: Listener<TState>[]
-
-  query<TSelection>(select: Select<TState, TSelection>): TSelection
-
-  subscribe(listener: Listener<TState>): Unsubscribe
-  subscribe<TSelection>(
-    select: Select<TState, TSelection>,
-    listener: Listener<TSelection>
-  ): Unsubscribe
+  state: BehaviorSubject<TState>
+  events: Observable<EventType<TEvents>>
 
   dispatch<TData>(
     action: Action<TData>,
@@ -86,8 +76,5 @@ export type ActionTypes<TCommands> = {
 export type DataType<TCommand> = TCommand extends Command<any, any, infer TData>
   ? TData
   : {}
-
-export type Listener<TState> = (newState: TState, oldState?: TState) => void
-export type Unsubscribe = () => void
 
 export type Select<TState, TSelection> = (state: TState) => TSelection
