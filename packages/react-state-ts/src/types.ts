@@ -3,7 +3,7 @@ import { Observable } from 'rxjs'
 import { BehaviorSubject } from 'rxjs'
 
 export interface CreateStoreOptions<TState, TEvents> {
-  initialState?: TState
+  initialState: TState
 }
 
 export interface CreateStoreResult<TState, TEvents> {
@@ -22,22 +22,11 @@ export interface AddCommands<TState, TEvents> {
 }
 
 export interface AddCommandsResult<TCommands> {
-  useCommand: ExecCommand<TCommands>
-  command?: ExecCommand<TCommands>
+  useCommand: <TArgs extends any[]>(
+    createAction: (...args: TArgs) => ActionType<TCommands>
+  ) => (...args: TArgs) => void
+  command: (action: ActionType<TCommands>) => void
 }
-
-export type ExecCommand1<TCommands> = <K extends keyof TCommands>(
-  type: K,
-  data: DataType<TCommands[K]>
-) => () => void
-
-export type ExecCommand2<TCommands> = <TArgs extends any[]>(
-  createAction: (...args: TArgs) => ActionType<TCommands>
-) => (...args: TArgs) => void
-
-export interface ExecCommand<TCommands>
-  extends ExecCommand1<TCommands>,
-    ExecCommand2<TCommands> {}
 
 export interface StoreContainerProps<TState> {
   initialState: TState
@@ -54,7 +43,7 @@ export interface Store<TState, TEvents> {
   ): void
 }
 
-export type Action<TData> = { type: string; data: TData }
+export type Action<TData> = { type: string } & TData
 
 export type Command<TState, TEvents, TData> = (
   state: TState,

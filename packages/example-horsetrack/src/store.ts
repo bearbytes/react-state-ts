@@ -43,13 +43,9 @@ export const { command, useCommand } = addCommands({
   },
 })
 
-store.subscribe((s) => s, console.log)
+store.state.subscribe(console.log)
 
-// command!('addHorse', {
-//   horse: {
-//     color: 'black',
-//     name: 'Horse 1',
-//   },
-// })
-
-console.log('hello')
+command({
+  type: 'addHorse',
+  horse: { name: 'Horse 1', color: 'blue' },
+})
