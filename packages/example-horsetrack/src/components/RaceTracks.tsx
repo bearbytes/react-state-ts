@@ -1,13 +1,9 @@
 import React from 'react'
-import { useQuery } from '../store'
-import { AppState } from '../types'
-
-const Selectors = {
-  horseNames: (s: AppState) => s.horses.map((it) => it.name),
-}
+import { useQuery } from '../Store'
+import { selectHorseNames } from '../Selectors'
 
 export default function RaceTracks() {
-  const horseNames = useQuery(Selectors.horseNames)
+  const horseNames = useQuery(selectHorseNames)
 
   return (
     <div>
