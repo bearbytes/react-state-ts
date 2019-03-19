@@ -1,10 +1,4 @@
-import {
-  Commands,
-  AddCommandsResult,
-  Store,
-  ExecCommand,
-  ExecCommand1,
-} from './types'
+import { Commands, AddCommandsResult, Store, ExecCommand } from './types'
 
 export default function<TState, TEvents>(
   useStore: () => Store<TState, TEvents>,

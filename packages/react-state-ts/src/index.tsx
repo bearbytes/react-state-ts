@@ -28,7 +28,9 @@ export function defineCommands<TState, TEvents>() {
 export function createStore<TState, TEvents = {}>(
   opts: CreateStoreOptions<TState, TEvents>
 ): CreateStoreResult<TState, TEvents> {
-  const globalStore = opts.initialState ? createStore(opts.initialState) : null
+  const globalStore = opts.initialState
+    ? createStore(opts.initialState)
+    : undefined
 
   const query = globalStore
     ? function<TQueryResult>(query: Select<TState, TQueryResult>) {
@@ -49,7 +51,13 @@ export function createStore<TState, TEvents = {}>(
 
   const Context = React.createContext({ store: globalStore })
 
-  return { query, subscribe, useQuery, addCommands, StoreContainer }
+  return {
+    query,
+    subscribe,
+    useQuery,
+    addCommands: addCommands(useStore, globalStore),
+    StoreContainer,
+  }
 
   function useQuery<TQueryResult>(query: Select<TState, TQueryResult>) {
     const store = useStore()
