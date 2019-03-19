@@ -3,11 +3,11 @@ export interface CreateStoreOptions<TState, TEvents> {
 }
 
 export interface CreateStoreResult<TState, TEvents> {
-  // query?: Query<TState>
-  // subscribe?: Subscribe<TState>
-  // useQuery: UseQuery<TState>
-  // addCommands: AddCommands<TState, TEvents>
-  // StoreContainer: React.ComponentType<StoreContainerProps<TState>>
+  query?: Query<TState>
+  subscribe?: Subscribe<TState>
+  useQuery: UseQuery<TState>
+  addCommands: AddCommands<TState, TEvents>
+  StoreContainer: React.ComponentType<StoreContainerProps<TState>>
 }
 
 export interface AddCommands<TState, TEvents> {
@@ -36,12 +36,26 @@ export interface UseQuery<TState> {
   <TSelection>(select: Select<TState, TSelection>): TSelection
 }
 
-export interface ExecCommand<TCommands> {
-  <K extends keyof TCommands>(type: K, data: DataType<TCommands[K]>): () => void
-  <TArgs extends any[]>(
-    createAction: (...args: TArgs) => ActionType<TCommands>
-  ): (...args: TArgs) => void
-}
+// type ExecCommand1<TCommands> = <K extends keyof TCommands>(
+//   type: K,
+//   data: DataType<TCommands[K]>
+// ) => () => void
+// type ExecCommand2<TCommands> = <TArgs extends any[]>(
+//   createAction: (...args: TArgs) => ActionType<TCommands>
+// ) => (...args: TArgs) => void
+
+export type ExecCommand1<TCommands> = <K extends keyof TCommands>(
+  type: K,
+  data: DataType<TCommands[K]>
+) => () => void
+
+export type ExecCommand2<TCommands> = <TArgs extends any[]>(
+  createAction: (...args: TArgs) => ActionType<TCommands>
+) => (...args: TArgs) => void
+
+export interface ExecCommand<TCommands>
+  extends ExecCommand1<TCommands>,
+    ExecCommand2<TCommands> {}
 
 export interface StoreContainerProps<TState> {
   initialState: TState

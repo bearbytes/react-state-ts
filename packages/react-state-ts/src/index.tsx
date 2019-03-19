@@ -15,6 +15,7 @@ import {
   Command,
 } from './types'
 import immer from 'immer'
+import addCommands from './addCommands'
 
 export function defineCommands<TState, TEvents>() {
   return function<TCommands extends Commands<TState, TEvents>>(
@@ -49,36 +50,6 @@ export function createStore<TState, TEvents = {}>(
   const Context = React.createContext({ store: globalStore })
 
   return { query, subscribe, useQuery, addCommands, StoreContainer }
-
-  function addCommands<TCommands extends Commands<TState, TEvents>>(
-    commands: TCommands
-  ): AddCommandsResult<TCommands> {
-    return {
-      command: globalStore ? execCommand(globalStore) : undefined,
-      useCommand: execCommand(),
-    }
-
-    function execCommand(
-      store: Store<TState, TEvents> = useStore()
-    ): ExecCommand<TCommands> {
-      return function(arg1: any, arg2?: any) {
-        if (arg2 != undefined) {
-          // overload 1
-          const type = arg1
-          const data = arg2
-          const action = { type, data }
-          return () => store.dispatch(action, commands[type])
-        } else {
-          // overload 2
-          const createAction = arg1
-          return (...args: any[]) => {
-            const action = createAction(...args)
-            store.dispatch(action, commands[action.type])
-          }
-        }
-      }
-    }
-  }
 
   function useQuery<TQueryResult>(query: Select<TState, TQueryResult>) {
     const store = useStore()
