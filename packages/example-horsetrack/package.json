@@ -6,7 +6,8 @@
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-scripts": "2.1.8",
-    "react-state-ts": "*"
+    "react-state-ts": "*",
+    "rimraf": "^2.6.3"
   },
   "devDependencies": {
     "@types/react": "^16.8.8",
@@ -14,6 +15,7 @@
     "typescript": "^3.3.3333"
   },
   "scripts": {
+    "clean": "rimraf dist",
     "dev": "npm start",
     "start": "react-scripts start",
     "build": "react-scripts build",

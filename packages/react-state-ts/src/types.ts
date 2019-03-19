@@ -3,14 +3,11 @@ export interface CreateStoreOptions<TState, TEvents> {
 }
 
 export interface CreateStoreResult<TState, TEvents> {
-  query?: Query<TState>
-  subscribe?: Subscribe<TState>
-
-  useQuery: UseQuery<TState>
-
-  addCommands: AddCommands<TState, TEvents>
-
-  StoreContainer: React.ComponentType<StoreContainerProps<TState>>
+  // query?: Query<TState>
+  // subscribe?: Subscribe<TState>
+  // useQuery: UseQuery<TState>
+  // addCommands: AddCommands<TState, TEvents>
+  // StoreContainer: React.ComponentType<StoreContainerProps<TState>>
 }
 
 export interface AddCommands<TState, TEvents> {

@@ -1,8 +1,16 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "noEmit": false,
+    "target": "es5",
     "outDir": "dist",
-    "rootDir": "src"
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react",
+
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   }
 }
