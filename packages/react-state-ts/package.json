@@ -1,6 +1,6 @@
 {
   "name": "@bearbytes/react-state-ts",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "CQS for React with Redux integration and full Typescript support",
   "author": "pancomputationalist",
   "main": "dist/index.js",
@@ -14,7 +14,8 @@
     "build": "tsc",
     "dev": "tsc -w",
     "prepare": "npm run build",
-    "upload": "npm version patch && npm publish --access public"
+    "upload": "npm version patch && npm publish --access public",
+    "install": "npm run build && cp -r dist/* ../../../guadabeats/node_modules/@bearbytes/react-state-ts/dist"
   },
   "dependencies": {
     "immer": "^2.1.3",

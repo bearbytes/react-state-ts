@@ -1,7 +1,6 @@
 import { Store, Action, Command, EventType } from './types'
 import immer from 'immer'
 import { BehaviorSubject, Subject } from 'rxjs'
-import { devToolsEnhancer } from 'redux-devtools-extension'
 
 export default function createStore<TState, TEvents>(
   initialState: TState
@@ -23,23 +22,28 @@ export default function createStore<TState, TEvents>(
   ) {
     const oldState = store.state.value
 
+    let emittedEvents: EventType<TEvents>[] = []
+
     const newState = immer(oldState, (draft: TState) => {
       const commandResult = command(draft, action)
-
       if (Array.isArray(commandResult)) {
-        for (const event of commandResult) {
-          events.next(event)
-        }
+        commandResult.forEach((event) => emittedEvents.push(deepClone(event)))
       } else if (typeof commandResult == 'object') {
-        events.next(commandResult)
+        emittedEvents.push(deepClone(commandResult))
       }
     })
 
-    if (devTools) {
-      devTools.send(action, newState)
-    }
-
     store.state.next(newState)
+    emittedEvents.forEach((event) => {
+      events.next(event)
+    })
+
+    if (devTools) {
+      devTools.send({ ...action, type: 'command: ' + action.type }, newState)
+      emittedEvents.forEach((event) => {
+        devTools.send({ ...event, type: 'event: ' + event.type }, newState)
+      })
+    }
   }
 
   return store
@@ -55,5 +59,24 @@ function installDevTools(store: Store<any, any>) {
   const devTools = ext.connect({})
 
   devTools.init(store.state.value)
+
   return devTools
+}
+
+function deepClone(X: any): any {
+  if (Array.isArray(X)) {
+    const clone: any[] = []
+    for (const item of X) {
+      clone.push(deepClone(item))
+    }
+    return clone
+  }
+  if (typeof X == 'object') {
+    const clone: Record<string, any> = {}
+    for (const key of Object.keys(X)) {
+      clone[key] = deepClone(X[key])
+    }
+    return clone
+  }
+  return X
 }
