@@ -25,7 +25,14 @@ export default function createStore<TState, TEvents>(
 
     const newState = immer(oldState, (draft: TState) => {
       const commandResult = command(draft, action)
-      // TODO trigger events from commandResult
+
+      if (Array.isArray(commandResult)) {
+        for (const event of commandResult) {
+          events.next(event)
+        }
+      } else if (typeof commandResult == 'object') {
+        events.next(commandResult)
+      }
     })
 
     if (devTools) {
