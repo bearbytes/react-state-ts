@@ -1,6 +1,7 @@
 import { Store, Action, Command, EventType } from './types'
 import immer from 'immer'
 import { BehaviorSubject, Subject } from 'rxjs'
+import { devToolsEnhancer } from 'redux-devtools-extension'
 
 export default function createStore<TState, TEvents>(
   initialState: TState
@@ -14,6 +15,8 @@ export default function createStore<TState, TEvents>(
     dispatch,
   }
 
+  const devTools = installDevTools(store)
+
   function dispatch<TData>(
     action: Action<TData>,
     command: Command<TState, TEvents, TData>
@@ -25,8 +28,25 @@ export default function createStore<TState, TEvents>(
       // TODO trigger events from commandResult
     })
 
+    if (devTools) {
+      devTools.send(action, newState)
+    }
+
     store.state.next(newState)
   }
 
   return store
+}
+
+function installDevTools(store: Store<any, any>) {
+  const w = window as any
+  if (!w) return
+
+  const ext = w.__REDUX_DEVTOOLS_EXTENSION__
+  if (!ext) return
+
+  const devTools = ext.connect({})
+
+  devTools.init(store.state.value)
+  return devTools
 }

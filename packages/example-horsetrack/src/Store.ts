@@ -1,4 +1,4 @@
-import { createFromState } from 'react-state-ts'
+import { createFromState } from '@bearbytes/react-state-ts'
 import { AppState, RacingHorse } from './types'
 
 const initialState: AppState = {

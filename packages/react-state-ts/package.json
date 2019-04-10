@@ -1,8 +1,8 @@
 {
-  "name": "react-state-ts",
-  "version": "0.0.1",
+  "name": "@bearbytes/react-state-ts",
+  "version": "0.0.2",
   "description": "CQS for React with Redux integration and full Typescript support",
-  "author": "bearbytes",
+  "author": "pancomputationalist",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "ISC",
@@ -20,11 +20,11 @@
     "zen-observable-ts": "^0.8.18"
   },
   "peerDependencies": {
-    "react": "^16.8.4"
+    "react": "^16.8.6"
   },
   "devDependencies": {
     "@types/react": "^16.8.8",
-    "react": "^16.8.4",
+    "react": "^16.8.6",
     "typescript": "^3.3.3333"
   }
 }

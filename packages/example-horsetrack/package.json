@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@bearbytes/react-state-ts": "*",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-scripts": "2.1.8",
-    "react-state-ts": "*",
     "rimraf": "^2.6.3"
   },
   "devDependencies": {
