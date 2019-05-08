@@ -8,14 +8,14 @@ export function createFromState<TState, TEvents = {}>(
 ): CreateStoreResult<TState, TEvents> {
   const store = createStore<TState, TEvents>(opts.initialState!)
 
-  const { useStore, useQuery, StoreContainer } = addReactContext<
+  const { useStore, useSelection, StoreContainer } = addReactContext<
     TState,
     TEvents
   >(store)
 
   return {
     store,
-    useQuery,
+    useSelection,
     StoreContainer,
     addCommands: addCommands<TState, TEvents>(useStore, store),
   }

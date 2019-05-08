@@ -15,7 +15,7 @@ export default function addReactContext<TState, TEvents>(
     return store
   }
 
-  function useQuery<TSelection>(
+  function useSelection<TSelection>(
     select: Select<TState, TSelection>
   ): TSelection {
     const store = useStore()
@@ -40,5 +40,5 @@ export default function addReactContext<TState, TEvents>(
     )
   }
 
-  return { useStore, useQuery, StoreContainer }
+  return { useStore, useSelection, StoreContainer }
 }

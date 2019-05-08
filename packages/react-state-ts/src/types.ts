@@ -9,7 +9,7 @@ export interface CreateStoreOptions<TState, TEvents> {
 export interface CreateStoreResult<TState, TEvents> {
   store: Store<TState, TEvents>
 
-  useQuery<TSelection>(select: Select<TState, TSelection>): TSelection
+  useSelection<TSelection>(select: Select<TState, TSelection>): TSelection
 
   addCommands: AddCommands<TState, TEvents>
   StoreContainer: React.ComponentType<StoreContainerProps<TState>>

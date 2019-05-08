@@ -13,10 +13,12 @@ interface Events {
   addedHorse: { horse: RacingHorse }
 }
 
-export const { store, StoreContainer, useQuery, addCommands } = createFromState<
-  AppState,
-  Events
->({ initialState })
+export const {
+  store,
+  StoreContainer,
+  useSelection,
+  addCommands,
+} = createFromState<AppState, Events>({ initialState })
 
 export const { command, useCommand } = addCommands({
   start: (s) => {

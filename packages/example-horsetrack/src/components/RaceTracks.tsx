@@ -1,9 +1,9 @@
 import React from 'react'
-import { useQuery } from '../Store'
+import { useSelection } from '../Store'
 import { selectHorseNames } from '../Selectors'
 
 export default function RaceTracks() {
-  const horseNames = useQuery(selectHorseNames)
+  const horseNames = useSelection(selectHorseNames)
 
   return (
     <div>
@@ -15,7 +15,7 @@ export default function RaceTracks() {
 }
 
 function RaceTrack(props: { horseName: string }) {
-  const progress = useQuery((s) => s.progress[props.horseName])
+  const progress = useSelection((s) => s.progress[props.horseName])
   return (
     <div>
       {props.horseName}: {Math.round(progress * 100)}
