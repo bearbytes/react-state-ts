@@ -1,6 +1,6 @@
 {
   "name": "@bearbytes/react-state-ts",
-  "version": "0.1.0",
+  "version": "0.0.3-alpha.0",
   "description": "CQS for React with Redux integration and full Typescript support",
   "author": "pancomputationalist",
   "main": "dist/index.js",
