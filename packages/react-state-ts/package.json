@@ -13,9 +13,7 @@
     "clean": "rimraf dist",
     "build": "tsc",
     "dev": "tsc -w",
-    "prepare": "npm run build",
-    "upload": "npm version patch && npm publish --access public",
-    "install": "npm run build && cp -r dist/* ../../../guadabeats/node_modules/@bearbytes/react-state-ts/dist"
+    "prepare": "npm run build"
   },
   "dependencies": {
     "immer": "^2.1.3",
